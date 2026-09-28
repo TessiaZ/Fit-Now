@@ -14,6 +14,8 @@ FitNow 把这些分散资源聚合到一个 App 里，按**时间近、距离近
 | 健身却不会吃、不会睡 | AI 生成每日菜谱 + 饮水提醒 + 睡眠计划 |
 | 数据散落多个 App | 运动档案、打卡记录、报名记录统一管理 |
 
+<img width="1009" height="811" alt="image" src="https://github.com/user-attachments/assets/fabf0825-302f-41c8-875a-4535e576c745" />
+
 demo：http://fit-now-demo.netlify.app/
 
 ## 📱 功能模块
