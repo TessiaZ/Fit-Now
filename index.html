@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitNow · 运动推荐平台 Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(160deg, #EEF3FF 0%, #EAF3FB 50%, #F0EFFE 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 32px 48px;
+        }
+
+        /* ===== 标题 ===== */
+        .page-title {
+            text-align: center;
+            margin-bottom: 42px;
+        }
+        .page-title h1 {
+            font-size: 22px;
+            font-weight: 900;
+            color: #1A1A3E;
+        }
+        .page-title h1 em {
+            font-style: normal;
+            color: #4F8EF7;
+        }
+
+        /* ===== 三栏布局 ===== */
+        .showcase {
+            display: flex;
+            align-items: center;
+            gap: 44px;
+            width: 100%;
+            max-width: 1240px;
+            justify-content: center;
+        }
+
+        /* ===== 左侧 Tab 列 ===== */
+        .left-col {
+            width: 185px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+        }
+
+        .tab-btn {
+            width: 100%;
+            padding: 13px 0;
+            border-radius: 10px;
+            border: none;
+            font-size: 15px;
+            font-weight: 800;
+            color: white;
+            background: #4F8EF7;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            text-align: center;
+        }
+
+        .tab-btn:not(.active) {
+            background: #B8D1F8;
+            color: white;
+        }
+
+        .tab-btn.active {
+            background: #4F8EF7;
+            box-shadow: 0 6px 18px rgba(79,142,247,0.38);
+        }
+
+        .tab-desc {
+            font-size: 12px;
+            color: #9494B8;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .tab-item.active .tab-desc {
+            color: #4F8EF7;
+            font-weight: 600;
+        }
+
+        /* ===== 手机 ===== */
+        .phone-col {
+            flex-shrink: 0;
+        }
+
+        .phone-shell {
+            width: 336px;
+            height: 700px;
+            background: #181818;
+            border-radius: 54px;
+            padding: 12px;
+            box-shadow:
+                0 0 0 1.5px #2e2e2e,
+                0 36px 96px rgba(0,0,0,0.32),
+                inset 0 0 0 1px #3a3a3a;
+            position: relative;
+        }
+
+        /* 侧键 */
+        .phone-shell::before {
+            content: '';
+            position: absolute;
+            left: -3px; top: 118px;
+            width: 3px; height: 36px;
+            background: #262626;
+            border-radius: 2px 0 0 2px;
+            box-shadow: 0 52px 0 #262626, 0 98px 0 #262626;
+        }
+        .phone-shell::after {
+            content: '';
+            position: absolute;
+            right: -3px; top: 148px;
+            width: 3px; height: 72px;
+            background: #262626;
+            border-radius: 0 2px 2px 0;
+        }
+
+        .phone-screen {
+            width: 312px;
+            height: 676px;
+            background: #F4F6FB;
+            border-radius: 44px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 打孔摄像头 */
+        .phone-camera {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 11px; height: 11px;
+            background: #111;
+            border-radius: 50%;
+            z-index: 20;
+        }
+
+        /* Home 条 */
+        .phone-home {
+            position: absolute;
+            bottom: 7px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 84px; height: 4px;
+            background: rgba(0,0,0,0.18);
+            border-radius: 2px;
+            z-index: 20;
+        }
+
+        /* iframe 缩放嵌入 */
+        .iframe-wrap {
+            position: absolute;
+            top: 0; left: 0;
+            width: 312px;
+            height: 676px;
+            overflow: hidden;
+            border-radius: 44px;
+        }
+
+        .iframe-wrap iframe {
+            width: 390px;
+            height: 845px;
+            border: none;
+            transform: scale(0.8);
+            transform-origin: top left;
+        }
+
+        /* ===== 右侧说明 ===== */
+        .right-col {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .explain-block {
+            display: none;
+            animation: fadeIn 0.26s ease;
+        }
+        .explain-block.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* 顶部主卡片 */
+        .main-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px 20px 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+        }
+
+        .main-card-eyebrow {
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #FF9F43;
+        }
+
+        .main-card h2 {
+            font-size: 19px;
+            font-weight: 900;
+            color: #1A1A3E;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .main-card h2 em {
+            font-style: normal;
+            color: #4F8EF7;
+        }
+
+        .main-card p {
+            font-size: 12px;
+            color: #8A8AB8;
+            line-height: 1.65;
+        }
+
+        /* 分区标签 */
+        .section-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: #C0C0D8;
+            letter-spacing: 0.4px;
+            margin: 10px 0 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 功能行 */
+        .feature-row {
+            background: white;
+            border-radius: 10px;
+            padding: 11px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+            transition: box-shadow 0.18s;
+            cursor: default;
+        }
+
+        .feature-row:hover {
+            box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+        }
+
+        .fr-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .fr-text h5 {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1A1A3E;
+            margin-bottom: 2px;
+        }
+
+        .fr-text p {
+            font-size: 11px;
+            color: #9A9ABE;
+            line-height: 1.45;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 标题 -->
+<div class="page-title">
+    <h1>动起来 · <em>FitNow 运动健康平台</em> · App Demo 展示</h1>
+</div>
+
+<!-- 三栏 -->
+<div class="showcase">
+
+    <!-- 左侧 Tab -->
+    <div class="left-col">
+        <div class="tab-item active" id="ti-home" onclick="switchTab('home')">
+            <button class="tab-btn active" id="btn-home">🏠 首页</button>
+            <div class="tab-desc">运动数据 & 今日计划<br>个性化推荐聚合</div>
+        </div>
+        <div class="tab-item" id="ti-nearby" onclick="switchTab('nearby')">
+            <button class="tab-btn" id="btn-nearby">📍 附近</button>
+            <div class="tab-desc">实时爬取周边赛事<br>场馆 & 活动报名</div>
+        </div>
+        <div class="tab-item" id="ti-course" onclick="switchTab('course')">
+            <button class="tab-btn" id="btn-course">🎯 跟练</button>
+            <div class="tab-desc">博主课程聚合<br>标准动作库</div>
+        </div>
+        <div class="tab-item" id="ti-health" onclick="switchTab('health')">
+            <button class="tab-btn" id="btn-health">🥗 健康</button>
+            <div class="tab-desc">每日菜谱 & 饮水<br>睡眠建议</div>
+        </div>
+        <div class="tab-item" id="ti-profile" onclick="switchTab('profile')">
+            <button class="tab-btn" id="btn-profile">👤 我的</button>
+            <div class="tab-desc">运动档案 & 周报<br>数据源配置</div>
+        </div>
+    </div>
+
+    <!-- 手机 -->
+    <div class="phone-col">
+        <div class="phone-shell">
+            <div class="phone-screen">
+                <div class="phone-camera"></div>
+                <div class="iframe-wrap">
+                    <iframe id="appFrame"></iframe>
+                </div>
+                <div class="phone-home"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧说明 -->
+    <div class="right-col">
+
+        <!-- 首页 -->
+        <div class="explain-block active" id="explain-home">
+            <div class="main-card">
+                <div class="main-card-eyebrow">⚡ 个性化首页</div>
+                <h2>随时随地，<em>掌握运动全局</em></h2>
+                <p>今日步数、热量、计划打卡一目了然，AI 根据位置与偏好实时推荐活动</p>
+            </div>
+            <div class="section-label">🔄 自动聚合</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(79,142,247,0.1);">📊</div>
+                <div class="fr-text"><h5>实时运动数据</h5><p>步数、热量、时长同步传感器</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(255,107,107,0.1);">🔥</div>
+                <div class="fr-text"><h5>热门活动 Banner</h5><p>爬取周边赛事课程，可滑动浏览</p></div>
+            </div>
+            <div class="section-label">✏️ 手动操作</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(46,203,142,0.1);">📋</div>
+                <div class="fr-text"><h5>今日计划打卡</h5><p>点击勾选完成，进度实时更新</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(166,108,255,0.1);">⚡</div>
+                <div class="fr-text"><h5>8 个快捷入口</h5><p>马拉松/健身/游泳/瑜伽/跟练等</p></div>
+            </div>
+        </div>
+
+        <!-- 附近 -->
+        <div class="explain-block" id="explain-nearby">
+            <div class="main-card">
+                <div class="main-card-eyebrow">📍 附近场馆 & 赛事</div>
+                <h2>真实爬取，<em>周边资源不遗漏</em></h2>
+                <p>对接 6 个数据源，自动抓取 50km 内活动与场馆，每 2 小时更新</p>
+            </div>
+            <div class="section-label">🕸️ 数据爬取源</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(255,107,107,0.1);">🏅</div>
+                <div class="fr-text"><h5>赛事大数据平台</h5><p>马拉松、铁三等官方赛事报名</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(79,142,247,0.1);">🗺️</div>
+                <div class="fr-text"><h5>地图 POI 数据</h5><p>健身房、游泳馆、瑜伽工作室</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(255,159,67,0.1);">📅</div>
+                <div class="fr-text"><h5>活动票务平台</h5><p>大麦/摩登天空线下运动活动</p></div>
+            </div>
+            <div class="section-label">🔍 交互功能</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(46,203,142,0.1);">📄</div>
+                <div class="fr-text"><h5>详情弹窗 & 一键报名</h5><p>价格/名额/更新时效直接报名</p></div>
+            </div>
+        </div>
+
+        <!-- 跟练 -->
+        <div class="explain-block" id="explain-course">
+            <div class="main-card">
+                <div class="main-card-eyebrow">🎯 线上跟练内容</div>
+                <h2>好课聚合，<em>零器械在家练</em></h2>
+                <p>汇聚 B站/抖音/YouTube 头部博主课程，从 HIIT 到瑜伽应有尽有</p>
+            </div>
+            <div class="section-label">📺 内容爬取</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(255,107,107,0.1);">▶️</div>
+                <div class="fr-text"><h5>热门课程横滑卡片</h5><p>HIIT / 瑜伽 / 核心 / 拉伸分类</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(255,159,67,0.1);">🌟</div>
+                <div class="fr-text"><h5>博主推荐订阅</h5><p>帕梅拉、Adriene 等头部博主</p></div>
+            </div>
+            <div class="section-label">📚 知识库</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(79,142,247,0.1);">🦵</div>
+                <div class="fr-text"><h5>200+ 标准动作库</h5><p>姿势分解、错误纠正、难度分级</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(166,108,255,0.1);">🎓</div>
+                <div class="fr-text"><h5>30 天系列网课</h5><p>结构化训练路径，配套打卡计划</p></div>
+            </div>
+        </div>
+
+        <!-- 健康 -->
+        <div class="explain-block" id="explain-health">
+            <div class="main-card">
+                <div class="main-card-eyebrow">🥗 健康管理</div>
+                <h2>吃好睡好，<em>健康从细节开始</em></h2>
+                <p>AI 每日生成个性化菜谱，配套水分补充与睡眠计划，三维健康闭环</p>
+            </div>
+            <div class="section-label">🍽️ 饮食管理</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(46,203,142,0.1);">🥣</div>
+                <div class="fr-text"><h5>三餐时间轴菜谱</h5><p>精确到每道菜热量，可替换食材</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(79,142,247,0.1);">💧</div>
+                <div class="fr-text"><h5>饮水杯点击记录</h5><p>目标 2000ml，点击补水实时统计</p></div>
+            </div>
+            <div class="section-label">😴 作息管理</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(26,26,78,0.07);">🌙</div>
+                <div class="fr-text"><h5>睡眠计划 & Tips</h5><p>入睡/起床时间 + 3条科学建议</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(255,159,67,0.1);">📊</div>
+                <div class="fr-text"><h5>营养四项完成度</h5><p>热量/水分/蛋白质/睡眠进度</p></div>
+            </div>
+        </div>
+
+        <!-- 我的 -->
+        <div class="explain-block" id="explain-profile">
+            <div class="main-card">
+                <div class="main-card-eyebrow">👤 个人中心</div>
+                <h2>数据越用，<em>越懂你的节奏</em></h2>
+                <p>运动档案、本周柱状图、爬取源配置全在这里，越用越个性化</p>
+            </div>
+            <div class="section-label">🏅 成就体系</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(166,108,255,0.1);">🥈</div>
+                <div class="fr-text"><h5>运动成就徽章</h5><p>连续打卡天数、累计里程激励</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(79,142,247,0.1);">📊</div>
+                <div class="fr-text"><h5>本周运动柱状图</h5><p>每日时长可视化，趋势一目了然</p></div>
+            </div>
+            <div class="section-label">⚙️ 平台配置</div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(46,203,142,0.1);">🕸️</div>
+                <div class="fr-text"><h5>爬取数据源管理</h5><p>开关各平台、设置城市与频率</p></div>
+            </div>
+            <div class="feature-row">
+                <div class="fr-icon" style="background:rgba(255,107,107,0.1);">🎫</div>
+                <div class="fr-text"><h5>报名 & 预约记录</h5><p>已报活动统一管理，支持提醒</p></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== App 源码模板（注入 iframe） ===== -->
+<template id="app-src">
+  <html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>动起来 · FitNow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #4F8EF7;
+            --primary-dark: #3570d4;
+            --secondary: #FF6B6B;
+            --green: #2ECB8E;
+            --orange: #FF9F43;
+            --purple: #A66CFF;
+            --bg: #F4F6FB;
+            --card: #FFFFFF;
+            --text: #1A1A2E;
+            --text-secondary: #7A7A9D;
+            --border: #EAEAF5;
+            --nav-h: 64px;
+            --status-h: 44px;
+        }
+
+        body {
+            font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            max-width: 390px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-bar {
+            height: var(--status-h);
+            background: linear-gradient(135deg, #4F8EF7 0%, #6C63FF 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .status-bar .time { font-size: 15px; font-weight: 700; }
+        .status-bar .icons { display: flex; gap: 6px; align-items: center; }
+        .status-bar .icons span { font-size: 13px; }
+
+        .app-container {
+            height: calc(100vh - var(--status-h) - var(--nav-h));
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .page.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bottom-nav {
+            height: var(--nav-h);
+            background: white;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 390px;
+            z-index: 200;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 8px 0;
+        }
+
+        .nav-item .nav-icon { font-size: 22px; transition: transform 0.2s; }
+        .nav-item .nav-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+        .nav-item.active .nav-label { color: var(--primary); font-weight: 700; }
+        .nav-item.active .nav-icon { transform: scale(1.15); }
+
+        .nav-center-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .nav-center-btn .center-circle {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #4F8EF7, #6C63FF);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 16px rgba(79,142,247,0.4);
+            margin-top: -20px;
+            transition: transform 0.2s;
+        }
+
+        .nav-center-btn:active .center-circle { transform: scale(0.93); }
+        .nav-center-btn .nav-label { font-size: 11px; color: var(--primary); font-weight: 700; margin-top: 2px; }
+
+        .page-header {
+            padding: 20px 20px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-header h2 { font-size: 22px; font-weight: 800; color: var(--text); }
+        .page-header .header-action { font-size: 13px; color: var(--primary); font-weight: 600; cursor: pointer; }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 16px;
+            margin: 0 16px 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text);
+            padding: 16px 20px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title span { font-size: 12px; color: var(--primary); font-weight: 600; cursor: pointer; }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .tag-blue { background: rgba(79,142,247,0.12); color: var(--primary); }
+        .tag-red { background: rgba(255,107,107,0.12); color: var(--secondary); }
+        .tag-green { background: rgba(46,203,142,0.12); color: var(--green); }
+        .tag-orange { background: rgba(255,159,67,0.12); color: var(--orange); }
+        .tag-purple { background: rgba(166,108,255,0.12); color: var(--purple); }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4F8EF7, #6C63FF);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79,142,247,0.3);
+        }
+
+        .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+        .btn:active { transform: scale(0.96); }
+
+        .home-header {
+            background: linear-gradient(160deg, #4F8EF7 0%, #6C63FF 100%);
+            padding: 20px 20px 30px;
+            color: white;
+            border-radius: 0 0 28px 28px;
+        }
+
+        .home-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .home-greeting { font-size: 13px; opacity: 0.85; margin-bottom: 4px; }
+        .home-name { font-size: 22px; font-weight: 800; }
+        .home-avatar {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+
+        .home-stats {
+            display: flex;
+            background: rgba(255,255,255,0.18);
+            border-radius: 16px;
+            padding: 14px;
+            gap: 0;
+        }
+
+        .stat-item { flex: 1; text-align: center; }
+        .stat-item + .stat-item { border-left: 1px solid rgba(255,255,255,0.25); }
+        .stat-num { font-size: 22px; font-weight: 800; }
+        .stat-unit { font-size: 11px; opacity: 0.8; }
+        .stat-label { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+
+        .search-bar {
+            background: white;
+            border-radius: 14px;
+            margin: -14px 16px 0;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 5;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            color: var(--text);
+            background: transparent;
+        }
+
+        .search-bar input::placeholder { color: #BDBDCE; }
+        .search-icon { font-size: 18px; color: var(--primary); }
+        .filter-icon { font-size: 18px; color: var(--text-secondary); cursor: pointer; }
+
+        .banner-scroll {
+            display: flex;
+            gap: 12px;
+            padding: 16px 16px 4px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .banner-scroll::-webkit-scrollbar { display: none; }
+
+        .banner-card {
+            flex: 0 0 300px;
+            height: 150px;
+            border-radius: 18px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .banner-card .banner-bg {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            padding: 16px;
+            position: relative;
+        }
+
+        .banner-card .banner-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+        }
+
+        .banner-info { position: relative; z-index: 1; color: white; }
+        .banner-info h3 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+        .banner-info p { font-size: 12px; opacity: 0.9; }
+        .banner-badge {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: var(--secondary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            z-index: 1;
+        }
+
+        .quick-entry {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            padding: 8px 16px;
+        }
+
+        .entry-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 10px 4px;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+
+        .entry-item:active { background: var(--border); }
+
+        .entry-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .entry-label { font-size: 12px; font-weight: 600; color: var(--text); }
+
+        .plan-card {
+            background: var(--card);
+            border-radius: 18px;
+            margin: 0 16px 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .plan-header {
+            background: linear-gradient(135deg, #2ECB8E, #1aab72);
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .plan-header h3 { font-size: 15px; font-weight: 800; }
+        .plan-header span { font-size: 12px; opacity: 0.85; }
+
+        .plan-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            gap: 14px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .plan-item:last-child { border-bottom: none; }
+        .plan-item:active { background: #f8f8ff; }
+
+        .plan-check {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .plan-check.done {
+            background: var(--green);
+            border-color: var(--green);
+            color: white;
+            font-size: 13px;
+        }
+
+        .plan-info { flex: 1; }
+        .plan-info h4 { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+        .plan-info p { font-size: 12px; color: var(--text-secondary); }
+        .plan-time { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .filter-tabs::-webkit-scrollbar { display: none; }
+
+        .filter-tab {
+            flex: 0 0 auto;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--card);
+            color: var(--text-secondary);
+            border: 1.5px solid var(--border);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(79,142,247,0.3);
+        }
+
+        .nearby-map-mock {
+            margin: 0 16px 12px;
+            height: 160px;
+            background: linear-gradient(135deg, #e8f4f8, #d0e8f0);
+            border-radius: 18px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .map-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="160"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="%23b8d4e0" stroke-width="0.8"/></pattern></defs><rect width="400" height="160" fill="url(%23grid)"/></svg>');
+        }
+
+        .map-pin-center {
+            width: 18px; height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 4px rgba(79,142,247,0.2);
+            z-index: 2;
+        }
+
+        .map-pins { position: absolute; inset: 0; }
+
+        .map-pin {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .map-pin .pin-icon { font-size: 20px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+
+        .map-pin .pin-label {
+            font-size: 10px;
+            font-weight: 700;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+            white-space: nowrap;
+            color: var(--text);
+            margin-top: 2px;
+        }
+
+        .map-control {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .map-btn {
+            width: 32px; height: 32px;
+            background: white;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .sort-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 20px 8px;
+        }
+
+        .sort-bar span { font-size: 12px; color: var(--text-secondary); }
+        .sort-bar .sort-btn { font-size: 12px; color: var(--primary); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 3px; }
+
+        .venue-card {
+            background: var(--card);
+            border-radius: 16px;
+            margin: 0 16px 10px;
+            padding: 14px;
+            display: flex;
+            gap: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .venue-card:active { transform: scale(0.98); }
+
+        .venue-icon-box {
+            width: 64px; height: 64px;
+            border-radius: 14px;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+        }
+
+        .venue-info { flex: 1; min-width: 0; }
+        .venue-info h4 { font-size: 15px; font-weight: 800; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .venue-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .venue-meta span { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 2px; }
+        .venue-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .venue-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .venue-right .distance { font-size: 13px; font-weight: 700; color: var(--primary); }
+        .venue-right .rating { font-size: 12px; color: var(--orange); font-weight: 600; }
+        .venue-right .price { font-size: 12px; color: var(--green); font-weight: 700; }
+
+        .register-btn {
+            font-size: 12px;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #FF6B6B, #FF9F43);
+            color: white;
+            border-radius: 20px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(255,107,107,0.3);
+        }
+
+        .crawl-status {
+            margin: 0 16px 12px;
+            background: linear-gradient(135deg, rgba(46,203,142,0.08), rgba(79,142,247,0.08));
+            border: 1px solid rgba(46,203,142,0.2);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .crawl-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .crawl-text { font-size: 12px; color: var(--text-secondary); flex: 1; }
+        .crawl-text strong { color: var(--green); }
+        .crawl-refresh { font-size: 18px; cursor: pointer; }
+
+        .course-hero {
+            margin: 0 16px 12px;
+            height: 130px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .course-hero-info { color: white; }
+        .course-hero-info h3 { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
+        .course-hero-info p { font-size: 13px; opacity: 0.9; margin-bottom: 14px; }
+        .course-hero-emoji {
+            font-size: 70px;
+            opacity: 0.9;
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .course-scroll {
+            display: flex;
+            gap: 12px;
+            padding: 4px 16px 4px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .course-scroll::-webkit-scrollbar { display: none; }
+
+        .course-card {
+            flex: 0 0 160px;
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .course-card:active { transform: scale(0.97); }
+
+        .course-thumb {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 44px;
+            position: relative;
+        }
+
+        .course-thumb .play-btn {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .course-card:hover .play-btn { opacity: 1; }
+
+        .course-thumb .play-circle {
+            width: 36px; height: 36px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+            padding-left: 2px;
+        }
+
+        .course-card-info { padding: 10px 12px 12px; }
+        .course-card-info h4 { font-size: 13px; font-weight: 800; margin-bottom: 4px; }
+        .course-card-meta { display: flex; align-items: center; justify-content: space-between; }
+        .course-card-meta span { font-size: 11px; color: var(--text-secondary); }
+
+        .blogger-card {
+            background: var(--card);
+            border-radius: 16px;
+            margin: 0 16px 10px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        .blogger-avatar {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            border: 2.5px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+
+        .blogger-avatar::before {
+            content: '';
+            position: absolute;
+            inset: -2.5px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B6B, #FF9F43);
+            z-index: -1;
+        }
+
+        .blogger-info { flex: 1; }
+        .blogger-info h4 { font-size: 14px; font-weight: 800; margin-bottom: 3px; }
+        .blogger-info p { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+        .blogger-tags { display: flex; gap: 5px; }
+
+        .blogger-follow {
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .health-hero {
+            background: linear-gradient(160deg, #2ECB8E 0%, #1aab72 100%);
+            padding: 20px 20px 28px;
+            color: white;
+            border-radius: 0 0 28px 28px;
+            margin-bottom: 16px;
+        }
+
+        .health-hero h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+        .health-hero p { font-size: 13px; opacity: 0.85; margin-bottom: 18px; }
+
+        .health-rings { display: flex; gap: 12px; }
+
+        .ring-item {
+            flex: 1;
+            background: rgba(255,255,255,0.18);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .ring-emoji { font-size: 26px; margin-bottom: 4px; }
+        .ring-pct { font-size: 18px; font-weight: 800; }
+        .ring-label { font-size: 10px; opacity: 0.8; }
+
+        .meal-timeline { padding: 0 16px; }
+        .meal-item { display: flex; gap: 14px; margin-bottom: 4px; }
+
+        .meal-time-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 44px;
+            flex-shrink: 0;
+        }
+
+        .meal-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 4px; }
+        .meal-line { width: 2px; flex: 1; min-height: 20px; margin: 4px 0; }
+
+        .meal-card-content {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 14px;
+            flex: 1;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .meal-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .meal-card-header h4 { font-size: 15px; font-weight: 800; }
+        .meal-calories { font-size: 12px; font-weight: 700; color: var(--secondary); }
+
+        .meal-dishes { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .dish-item {
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 8px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .dish-item:active { background: var(--border); }
+        .dish-emoji { font-size: 22px; }
+        .dish-name { font-size: 11px; font-weight: 600; color: var(--text); margin-top: 4px; }
+        .dish-cal { font-size: 10px; color: var(--text-secondary); }
+
+        .sleep-card {
+            background: linear-gradient(135deg, #1a1a4e, #2d2d7a);
+            border-radius: 18px;
+            margin: 0 16px 12px;
+            padding: 18px;
+            color: white;
+        }
+
+        .sleep-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .sleep-header h3 { font-size: 17px; font-weight: 800; }
+        .sleep-header span { font-size: 12px; opacity: 0.7; }
+
+        .sleep-timeline {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            height: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .sleep-bar {
+            height: 100%;
+            border-radius: 50px;
+            background: linear-gradient(90deg, #A66CFF, #4F8EF7);
+        }
+
+        .sleep-times {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            opacity: 0.75;
+            margin-bottom: 16px;
+        }
+
+        .sleep-tips { display: flex; flex-direction: column; gap: 8px; }
+
+        .sleep-tip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .sleep-tip span { font-size: 16px; }
+        .sleep-tip p { font-size: 12px; opacity: 0.9; }
+
+        .water-card {
+            background: linear-gradient(135deg, #4F8EF7, #6C63FF);
+            border-radius: 18px;
+            margin: 0 16px 12px;
+            padding: 18px;
+            color: white;
+        }
+
+        .water-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .water-header h3 { font-size: 17px; font-weight: 800; }
+        .water-header span { font-size: 12px; opacity: 0.75; }
+
+        .water-cups { display: flex; gap: 10px; margin-bottom: 12px; }
+
+        .water-cup {
+            font-size: 22px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            filter: grayscale(1) opacity(0.5);
+        }
+
+        .water-cup.filled { filter: none; }
+        .water-cup:active { transform: scale(1.3); }
+        .water-progress { font-size: 13px; opacity: 0.85; }
+
+        .profile-header {
+            background: linear-gradient(160deg, #4F8EF7 0%, #6C63FF 100%);
+            padding: 24px 20px 36px;
+            color: white;
+            border-radius: 0 0 28px 28px;
+        }
+
+        .profile-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            border: 3px solid rgba(255,255,255,0.6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px;
+        }
+
+        .profile-info h3 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+        .profile-info p { font-size: 13px; opacity: 0.85; }
+        .profile-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .profile-stats {
+            display: flex;
+            background: rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .profile-stats .stat-item { color: white; }
+
+        .record-card {
+            background: var(--card);
+            border-radius: 16px;
+            margin: 0 16px 10px;
+            padding: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .record-header h4 { font-size: 16px; font-weight: 800; }
+        .record-header span { font-size: 12px; color: var(--primary); font-weight: 600; cursor: pointer; }
+
+        .week-chart { display: flex; gap: 6px; align-items: flex-end; height: 80px; }
+
+        .week-bar-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .week-bar { width: 100%; border-radius: 6px 6px 0 0; transition: height 0.3s; min-height: 4px; }
+        .week-label { font-size: 10px; color: var(--text-secondary); font-weight: 600; }
+        .week-val { font-size: 9px; color: var(--text-secondary); }
+
+        .menu-list {
+            background: var(--card);
+            border-radius: 16px;
+            margin: 0 16px 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 16px;
+            gap: 14px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:active { background: #f8f8ff; }
+
+        .menu-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .menu-label { flex: 1; font-size: 15px; font-weight: 600; }
+        .menu-arrow { font-size: 14px; color: var(--text-secondary); }
+        .menu-badge {
+            background: var(--secondary);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 300;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal-sheet {
+            background: white;
+            border-radius: 24px 24px 0 0;
+            padding: 20px;
+            width: 100%;
+            max-width: 390px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-handle {
+            width: 40px; height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row .detail-icon { font-size: 18px; width: 24px; text-align: center; }
+        .detail-row .detail-info { flex: 1; }
+        .detail-row .detail-info h5 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+        .detail-row .detail-info p { font-size: 12px; color: var(--text-secondary); }
+
+        .crawl-source-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .crawl-source-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 12px;
+        }
+
+        .source-logo {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .source-info { flex: 1; }
+        .source-info h5 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+        .source-info p { font-size: 11px; color: var(--text-secondary); }
+
+        .toggle-switch {
+            width: 44px; height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch.on { background: var(--green); }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px; height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.on::after { left: 22px; }
+
+        .toast {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(26,26,46,0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div class="status-bar">
+    <span class="time">16:08</span>
+    <div class="icons">
+        <span>📶</span>
+        <span>🔋</span>
+    </div>
+</div>
+
+<div class="app-container">
+
+    <!-- 首页 -->
+    <div class="page active" id="page-home">
+        <div class="home-header">
+            <div class="home-header-top">
+                <div>
+                    <div class="home-greeting">早上好，运动达人 👋</div>
+                    <div class="home-name">今天也要动起来！</div>
+                </div>
+                <div class="home-avatar">🏃</div>
+            </div>
+            <div class="home-stats">
+                <div class="stat-item">
+                    <div class="stat-num">6,234</div>
+                    <div class="stat-unit">步</div>
+                    <div class="stat-label">今日步数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">312</div>
+                    <div class="stat-unit">kcal</div>
+                    <div class="stat-label">消耗热量</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">42</div>
+                    <div class="stat-unit">min</div>
+                    <div class="stat-label">运动时长</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="搜索附近活动、课程、场馆…" id="searchInput">
+            <span class="filter-icon" onclick="showToast('筛选功能')">⚙️</span>
+        </div>
+
+        <div class="quick-entry">
+            <div class="entry-item" onclick="switchPage('nearby'); setFilter('marathon')">
+                <div class="entry-icon" style="background: rgba(255,107,107,0.12);">🏅</div>
+                <div class="entry-label">马拉松</div>
+            </div>
+            <div class="entry-item" onclick="switchPage('nearby'); setFilter('gym')">
+                <div class="entry-icon" style="background: rgba(79,142,247,0.12);">🏋️</div>
+                <div class="entry-label">健身房</div>
+            </div>
+            <div class="entry-item" onclick="switchPage('nearby'); setFilter('swim')">
+                <div class="entry-icon" style="background: rgba(46,203,142,0.12);">🏊</div>
+                <div class="entry-label">游泳馆</div>
+            </div>
+            <div class="entry-item" onclick="switchPage('nearby'); setFilter('yoga')">
+                <div class="entry-icon" style="background: rgba(166,108,255,0.12);">🧘</div>
+                <div class="entry-label">瑜伽课</div>
+            </div>
+            <div class="entry-item" onclick="switchPage('course')">
+                <div class="entry-icon" style="background: rgba(255,159,67,0.12);">📱</div>
+                <div class="entry-label">线上跟练</div>
+            </div>
+            <div class="entry-item" onclick="switchPage('nearby'); setFilter('ski')">
+                <div class="entry-icon" style="background: rgba(79,142,247,0.12);">⛷️</div>
+                <div class="entry-label">滑雪场</div>
+            </div>
+            <div class="entry-item" onclick="switchPage('health')">
+                <div class="entry-icon" style="background: rgba(46,203,142,0.12);">🥗</div>
+                <div class="entry-label">健康饮食</div>
+            </div>
+            <div class="entry-item" onclick="switchPage('health')">
+                <div class="entry-icon" style="background: rgba(26,26,78,0.1);">😴</div>
+                <div class="entry-label">睡眠管理</div>
+            </div>
+        </div>
+
+        <div class="section-title">🔥 热门活动 <span onclick="switchPage('nearby')">查看全部 ›</span></div>
+        <div class="banner-scroll">
+            <div class="banner-card" onclick="openVenueDetail('marathon')">
+                <div class="banner-bg" style="background: linear-gradient(135deg,#FF6B6B,#FF9F43);">
+                    <div class="banner-badge">本周末</div>
+                    <div class="banner-info">
+                        <h3>🏅 2026上海国际马拉松</h3>
+                        <p>📍 外滩 · 距您 3.2km · 名额剩余 208</p>
+                    </div>
+                </div>
+            </div>
+            <div class="banner-card" onclick="openVenueDetail('yoga')">
+                <div class="banner-bg" style="background: linear-gradient(135deg,#A66CFF,#6C63FF);">
+                    <div class="banner-badge">可报名</div>
+                    <div class="banner-info">
+                        <h3>🧘 Flow瑜伽早课</h3>
+                        <p>📍 静安 · 距您 1.5km · 明日 07:30</p>
+                    </div>
+                </div>
+            </div>
+            <div class="banner-card" onclick="openVenueDetail('swim')">
+                <div class="banner-bg" style="background: linear-gradient(135deg,#4F8EF7,#2ECB8E);">
+                    <div class="banner-badge">特惠</div>
+                    <div class="banner-info">
+                        <h3>🏊 奥体游泳中心</h3>
+                        <p>📍 浦东 · 距您 2.8km · ¥29/次</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">📋 今日计划</div>
+        <div class="plan-card">
+            <div class="plan-header">
+                <h3>运动计划 · 周一</h3>
+                <span>已完成 1/3</span>
+            </div>
+            <div class="plan-item" onclick="togglePlan(this)">
+                <div class="plan-check done">✓</div>
+                <div class="plan-info">
+                    <h4>晨间慢跑 5km</h4>
+                    <p>燃脂 · 中等强度</p>
+                </div>
+                <div class="plan-time">07:00</div>
+            </div>
+            <div class="plan-item" onclick="togglePlan(this)">
+                <div class="plan-check"></div>
+                <div class="plan-info">
+                    <h4>核心力量训练 30min</h4>
+                    <p>力量 · 跟练视频</p>
+                </div>
+                <div class="plan-time">12:30</div>
+            </div>
+            <div class="plan-item" onclick="togglePlan(this)">
+                <div class="plan-check"></div>
+                <div class="plan-info">
+                    <h4>拉伸放松 15min</h4>
+                    <p>恢复 · 睡前进行</p>
+                </div>
+                <div class="plan-time">21:30</div>
+            </div>
+        </div>
+
+        <div class="section-title">🤖 AI 为你推荐</div>
+        <div class="card">
+            <div class="card-title">📍 基于位置 · 个性推荐</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="switchPage('nearby')">
+                    <div style="font-size:28px;">⛷️</div>
+                    <div style="flex:1;">
+                        <div style="font-size:14px;font-weight:700;">崇礼滑雪场开板季来啦</div>
+                        <div style="font-size:12px;color:var(--text-secondary);">距您约 280km · 10月中旬开放 · 早鸟票8折</div>
+                    </div>
+                    <span class="tag tag-orange">热门</span>
+                </div>
+                <div style="height:1px;background:var(--border);"></div>
+                <div style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="switchPage('course')">
+                    <div style="font-size:28px;">💪</div>
+                    <div style="flex:1;">
+                        <div style="font-size:14px;font-weight:700;">帕梅拉30天挑战套课</div>
+                        <div style="font-size:12px;color:var(--text-secondary);">全网好评 · 零器械 · 每天15min</div>
+                    </div>
+                    <span class="tag tag-red">推荐</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 附近页 -->
+    <div class="page" id="page-nearby">
+        <div class="page-header">
+            <h2>📍 附近</h2>
+            <span class="header-action" onclick="openCrawlConfig()">⚙️ 数据源</span>
+        </div>
+
+        <div class="crawl-status">
+            <div class="crawl-dot"></div>
+            <div class="crawl-text">已从 <strong>6 个数据源</strong> 实时抓取，<strong>上海</strong> 周边 50km 内</div>
+            <span class="crawl-refresh" onclick="refreshCrawl()">🔄</span>
+        </div>
+
+        <div class="filter-tabs" id="filterTabs">
+            <div class="filter-tab active" onclick="filterVenues(this,'all')">全部</div>
+            <div class="filter-tab" onclick="filterVenues(this,'marathon')">🏅 赛事</div>
+            <div class="filter-tab" onclick="filterVenues(this,'gym')">🏋️ 健身房</div>
+            <div class="filter-tab" onclick="filterVenues(this,'swim')">🏊 游泳</div>
+            <div class="filter-tab" onclick="filterVenues(this,'yoga')">🧘 瑜伽</div>
+            <div class="filter-tab" onclick="filterVenues(this,'ski')">⛷️ 滑雪</div>
+        </div>
+
+        <div class="nearby-map-mock">
+            <div class="map-overlay">
+                <div class="map-pin-center"></div>
+            </div>
+            <div class="map-pins">
+                <div class="map-pin" style="top:30%;left:25%;" onclick="openVenueDetail('gym')">
+                    <span class="pin-icon">🏋️</span>
+                    <span class="pin-label">威尔仕健身</span>
+                </div>
+                <div class="map-pin" style="top:50%;left:60%;" onclick="openVenueDetail('swim')">
+                    <span class="pin-icon">🏊</span>
+                    <span class="pin-label">奥体游泳</span>
+                </div>
+                <div class="map-pin" style="top:20%;left:65%;" onclick="openVenueDetail('yoga')">
+                    <span class="pin-icon">🧘</span>
+                    <span class="pin-label">Flow瑜伽</span>
+                </div>
+                <div class="map-pin" style="top:70%;left:35%;" onclick="openVenueDetail('marathon')">
+                    <span class="pin-icon">🏅</span>
+                    <span class="pin-label">上马报名</span>
+                </div>
+            </div>
+            <div class="map-control">
+                <div class="map-btn" onclick="showToast('放大')">+</div>
+                <div class="map-btn" onclick="showToast('缩小')">−</div>
+            </div>
+        </div>
+
+        <div class="sort-bar">
+            <span>共找到 <strong>24</strong> 个结果</span>
+            <div class="sort-btn" onclick="showToast('排序方式')">距离最近 ▾</div>
+        </div>
+
+        <div id="venueList">
+            <div class="venue-card" data-type="marathon" onclick="openVenueDetail('marathon')">
+                <div class="venue-icon-box" style="background:rgba(255,107,107,0.1);">🏅</div>
+                <div class="venue-info">
+                    <h4>2026上海国际马拉松</h4>
+                    <div class="venue-meta">
+                        <span>📅 10月25日</span>
+                        <span>📍 3.2km</span>
+                        <span>⭐ 4.9</span>
+                    </div>
+                    <div class="venue-tags">
+                        <span class="tag tag-red">赛事</span>
+                        <span class="tag tag-orange">名额紧张</span>
+                    </div>
+                </div>
+                <div class="venue-right">
+                    <div class="distance">3.2km</div>
+                    <div class="rating">⭐ 4.9</div>
+                    <div class="register-btn">立即报名</div>
+                </div>
+            </div>
+
+            <div class="venue-card" data-type="yoga" onclick="openVenueDetail('yoga')">
+                <div class="venue-icon-box" style="background:rgba(166,108,255,0.1);">🧘</div>
+                <div class="venue-info">
+                    <h4>Flow 瑜伽工作室</h4>
+                    <div class="venue-meta">
+                        <span>🕐 明日 07:30</span>
+                        <span>📍 1.5km</span>
+                    </div>
+                    <div class="venue-tags">
+                        <span class="tag tag-purple">可报名</span>
+                        <span class="tag tag-green">5节课包</span>
+                    </div>
+                </div>
+                <div class="venue-right">
+                    <div class="distance">1.5km</div>
+                    <div class="price">¥99/5节</div>
+                    <div class="register-btn">报名</div>
+                </div>
+            </div>
+
+            <div class="venue-card" data-type="gym" onclick="openVenueDetail('gym')">
+                <div class="venue-icon-box" style="background:rgba(79,142,247,0.1);">🏋️</div>
+                <div class="venue-info">
+                    <h4>威尔仕健身（静安店）</h4>
+                    <div class="venue-meta">
+                        <span>🕐 06:00-23:00</span>
+                        <span>📍 0.8km</span>
+                    </div>
+                    <div class="venue-tags">
+                        <span class="tag tag-blue">健身房</span>
+                        <span class="tag tag-green">月卡优惠</span>
+                    </div>
+                </div>
+                <div class="venue-right">
+                    <div class="distance">0.8km</div>
+                    <div class="price">¥199/月</div>
+                    <div class="register-btn">预约</div>
+                </div>
+            </div>
+
+            <div class="venue-card" data-type="swim" onclick="openVenueDetail('swim')">
+                <div class="venue-icon-box" style="background:rgba(46,203,142,0.1);">🏊</div>
+                <div class="venue-info">
+                    <h4>奥体游泳中心</h4>
+                    <div class="venue-meta">
+                        <span>🕐 06:30-22:00</span>
+                        <span>📍 2.8km</span>
+                    </div>
+                    <div class="venue-tags">
+                        <span class="tag tag-green">游泳</span>
+                        <span class="tag tag-orange">特惠¥29</span>
+                    </div>
+                </div>
+                <div class="venue-right">
+                    <div class="distance">2.8km</div>
+                    <div class="price">¥29/次</div>
+                    <div class="register-btn">订票</div>
+                </div>
+            </div>
+
+            <div class="venue-card" data-type="ski" onclick="openVenueDetail('ski')">
+                <div class="venue-icon-box" style="background:rgba(79,142,247,0.1);">⛷️</div>
+                <div class="venue-info">
+                    <h4>崇礼万龙滑雪场</h4>
+                    <div class="venue-meta">
+                        <span>📅 10月15日开板</span>
+                        <span>📍 280km</span>
+                    </div>
+                    <div class="venue-tags">
+                        <span class="tag tag-blue">滑雪</span>
+                        <span class="tag tag-purple">早鸟8折</span>
+                    </div>
+                </div>
+                <div class="venue-right">
+                    <div class="distance">280km</div>
+                    <div class="price">¥480起</div>
+                    <div class="register-btn">预订</div>
+                </div>
+            </div>
+
+            <div class="venue-card" data-type="yoga" onclick="openVenueDetail('yoga2')">
+                <div class="venue-icon-box" style="background:rgba(166,108,255,0.1);">🏃</div>
+                <div class="venue-info">
+                    <h4>徐家汇公园晨跑俱乐部</h4>
+                    <div class="venue-meta">
+                        <span>🕐 每日 06:30</span>
+                        <span>📍 1.1km</span>
+                    </div>
+                    <div class="venue-tags">
+                        <span class="tag tag-green">免费</span>
+                        <span class="tag tag-blue">社群活动</span>
+                    </div>
+                </div>
+                <div class="venue-right">
+                    <div class="distance">1.1km</div>
+                    <div class="price">免费</div>
+                    <div class="register-btn">加入</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 跟练页 -->
+    <div class="page" id="page-course">
+        <div class="page-header">
+            <h2>🎯 跟练</h2>
+            <span class="header-action" onclick="showToast('搜索课程')">🔍</span>
+        </div>
+
+        <div class="course-hero">
+            <div class="course-hero-info">
+                <h3>今日推荐课程</h3>
+                <p>适合你的强度 · 零器械</p>
+                <button class="btn btn-primary" style="font-size:13px;padding:8px 18px;" onclick="showToast('开始跟练')">▶ 开始跟练</button>
+            </div>
+            <div class="course-hero-emoji">💪</div>
+        </div>
+
+        <div class="section-title">🔥 热门跟练 <span>查看全部 ›</span></div>
+        <div class="course-scroll">
+            <div class="course-card" onclick="openCourseDetail('hiit')">
+                <div class="course-thumb" style="background:linear-gradient(135deg,#FF6B6B20,#FF9F4320);">
+                    🔥
+                    <div class="play-btn"><div class="play-circle">▶</div></div>
+                </div>
+                <div class="course-card-info">
+                    <h4>帕梅拉 HIIT 燃脂</h4>
+                    <div class="course-card-meta">
+                        <span>⏱ 20min</span>
+                        <span class="tag tag-red">热</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-card" onclick="openCourseDetail('yoga_flow')">
+                <div class="course-thumb" style="background:linear-gradient(135deg,#A66CFF20,#6C63FF20);">
+                    🧘
+                    <div class="play-btn"><div class="play-circle">▶</div></div>
+                </div>
+                <div class="course-card-info">
+                    <h4>晨间瑜伽流</h4>
+                    <div class="course-card-meta">
+                        <span>⏱ 30min</span>
+                        <span class="tag tag-purple">新</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-card" onclick="openCourseDetail('core')">
+                <div class="course-thumb" style="background:linear-gradient(135deg,#4F8EF720,#2ECB8E20);">
+                    🏋️
+                    <div class="play-btn"><div class="play-circle">▶</div></div>
+                </div>
+                <div class="course-card-info">
+                    <h4>核心力量 30天</h4>
+                    <div class="course-card-meta">
+                        <span>⏱ 15min/天</span>
+                        <span class="tag tag-blue">系列</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-card" onclick="openCourseDetail('stretch')">
+                <div class="course-thumb" style="background:linear-gradient(135deg,#2ECB8E20,#FF9F4320);">
+                    🤸
+                    <div class="play-btn"><div class="play-circle">▶</div></div>
+                </div>
+                <div class="course-card-info">
+                    <h4>全身拉伸放松</h4>
+                    <div class="course-card-meta">
+                        <span>⏱ 15min</span>
+                        <span class="tag tag-green">恢复</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">🌟 推荐博主 <span>更多 ›</span></div>
+
+        <div class="blogger-card">
+            <div class="blogger-avatar" style="background:#FF6B6B20;">💪</div>
+            <div class="blogger-info">
+                <h4>帕梅拉 Pamela Reif</h4>
+                <p>1500万粉丝 · 零器械塑形专家</p>
+                <div class="blogger-tags">
+                    <span class="tag tag-red">HIIT</span>
+                    <span class="tag tag-orange">塑形</span>
+                </div>
+            </div>
+            <button class="btn blogger-follow tag-blue" style="font-size:12px;padding:7px 14px;background:var(--primary);color:white;border:none;" onclick="showToast('已关注帕梅拉')">+ 关注</button>
+        </div>
+
+        <div class="blogger-card">
+            <div class="blogger-avatar" style="background:#A66CFF20;">🧘</div>
+            <div class="blogger-info">
+                <h4>Adriene 瑜伽</h4>
+                <p>800万粉丝 · 适合初学者</p>
+                <div class="blogger-tags">
+                    <span class="tag tag-purple">瑜伽</span>
+                    <span class="tag tag-green">冥想</span>
+                </div>
+            </div>
+            <button class="btn blogger-follow" style="font-size:12px;padding:7px 14px;background:var(--primary);color:white;border:none;" onclick="showToast('已关注Adriene')">+ 关注</button>
+        </div>
+
+        <div class="blogger-card">
+            <div class="blogger-avatar" style="background:#4F8EF720;">🏃</div>
+            <div class="blogger-info">
+                <h4>Keep官方课程</h4>
+                <p>专业认证教练 · 系统化训练</p>
+                <div class="blogger-tags">
+                    <span class="tag tag-blue">系统课</span>
+                    <span class="tag tag-orange">多级别</span>
+                </div>
+            </div>
+            <button class="btn blogger-follow" style="font-size:12px;padding:7px 14px;background:var(--primary);color:white;border:none;" onclick="showToast('已关注Keep')">+ 关注</button>
+        </div>
+
+        <div class="section-title">📚 动作库 <span>全部 ›</span></div>
+        <div class="card">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                <div style="text-align:center;cursor:pointer;padding:12px 4px;" onclick="showToast('深蹲教学')">
+                    <div style="font-size:32px;margin-bottom:6px;">🦵</div>
+                    <div style="font-size:12px;font-weight:700;">深蹲</div>
+                    <div style="font-size:10px;color:var(--text-secondary);">下肢 · 初级</div>
+                </div>
+                <div style="text-align:center;cursor:pointer;padding:12px 4px;" onclick="showToast('平板支撑教学')">
+                    <div style="font-size:32px;margin-bottom:6px;">🏋️</div>
+                    <div style="font-size:12px;font-weight:700;">平板支撑</div>
+                    <div style="font-size:10px;color:var(--text-secondary);">核心 · 初级</div>
+                </div>
+                <div style="text-align:center;cursor:pointer;padding:12px 4px;" onclick="showToast('俯卧撑教学')">
+                    <div style="font-size:32px;margin-bottom:6px;">💪</div>
+                    <div style="font-size:12px;font-weight:700;">俯卧撑</div>
+                    <div style="font-size:10px;color:var(--text-secondary);">上肢 · 初级</div>
+                </div>
+                <div style="text-align:center;cursor:pointer;padding:12px 4px;" onclick="showToast('跳绳教学')">
+                    <div style="font-size:32px;margin-bottom:6px;">🤸</div>
+                    <div style="font-size:12px;font-weight:700;">跳绳</div>
+                    <div style="font-size:10px;color:var(--text-secondary);">有氧 · 初级</div>
+                </div>
+                <div style="text-align:center;cursor:pointer;padding:12px 4px;" onclick="showToast('瑜伽下犬式')">
+                    <div style="font-size:32px;margin-bottom:6px;">🧘</div>
+                    <div style="font-size:12px;font-weight:700;">下犬式</div>
+                    <div style="font-size:10px;color:var(--text-secondary);">拉伸 · 初级</div>
+                </div>
+                <div style="text-align:center;cursor:pointer;padding:12px 4px;" onclick="showToast('更多动作')">
+                    <div style="font-size:32px;margin-bottom:6px;">➕</div>
+                    <div style="font-size:12px;font-weight:700;">更多</div>
+                    <div style="font-size:10px;color:var(--text-secondary);">200+ 动作</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 健康页 -->
+    <div class="page" id="page-health">
+        <div class="health-hero">
+            <h2>🥗 健康管理</h2>
+            <p>今日营养摄入 & 作息建议</p>
+            <div class="health-rings">
+                <div class="ring-item">
+                    <div class="ring-emoji">🔥</div>
+                    <div class="ring-pct">68%</div>
+                    <div class="ring-label">热量目标</div>
+                </div>
+                <div class="ring-item">
+                    <div class="ring-emoji">💧</div>
+                    <div class="ring-pct">50%</div>
+                    <div class="ring-label">水分补充</div>
+                </div>
+                <div class="ring-item">
+                    <div class="ring-emoji">🥩</div>
+                    <div class="ring-pct">82%</div>
+                    <div class="ring-label">蛋白质</div>
+                </div>
+                <div class="ring-item">
+                    <div class="ring-emoji">😴</div>
+                    <div class="ring-pct">7.5h</div>
+                    <div class="ring-label">昨日睡眠</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="water-card">
+            <div class="water-header">
+                <h3>💧 今日饮水</h3>
+                <span>目标 2000ml</span>
+            </div>
+            <div class="water-cups" id="waterCups">
+                <span class="water-cup filled" onclick="toggleWater(0)">🥤</span>
+                <span class="water-cup filled" onclick="toggleWater(1)">🥤</span>
+                <span class="water-cup filled" onclick="toggleWater(2)">🥤</span>
+                <span class="water-cup filled" onclick="toggleWater(3)">🥤</span>
+                <span class="water-cup" onclick="toggleWater(4)">🥤</span>
+                <span class="water-cup" onclick="toggleWater(5)">🥤</span>
+                <span class="water-cup" onclick="toggleWater(6)">🥤</span>
+                <span class="water-cup" onclick="toggleWater(7)">🥤</span>
+            </div>
+            <div class="water-progress" id="waterProgress">已喝 1000ml · 还差 1000ml</div>
+        </div>
+
+        <div class="section-title">🍽️ 今日菜谱</div>
+
+        <div class="meal-timeline">
+            <div class="meal-item">
+                <div class="meal-time-col">
+                    <div style="font-size:11px;color:var(--orange);font-weight:700;">07:30</div>
+                    <div class="meal-dot" style="background:var(--orange);"></div>
+                    <div class="meal-line" style="background:linear-gradient(var(--orange),var(--green));"></div>
+                </div>
+                <div class="meal-card-content">
+                    <div class="meal-card-header">
+                        <h4>🌅 早餐</h4>
+                        <span class="meal-calories">~480 kcal</span>
+                    </div>
+                    <div class="meal-dishes">
+                        <div class="dish-item">
+                            <div class="dish-emoji">🥣</div>
+                            <div class="dish-name">燕麦粥</div>
+                            <div class="dish-cal">180kcal</div>
+                        </div>
+                        <div class="dish-item">
+                            <div class="dish-emoji">🥚</div>
+                            <div class="dish-name">水煮蛋×2</div>
+                            <div class="dish-cal">150kcal</div>
+                        </div>
+                        <div class="dish-item">
+                            <div class="dish-emoji">🍌</div>
+                            <div class="dish-name">香蕉</div>
+                            <div class="dish-cal">90kcal</div>
+                        </div>
+                        <div class="dish-item">
+                            <div class="dish-emoji">🥛</div>
+                            <div class="dish-name">脱脂牛奶</div>
+                            <div class="dish-cal">60kcal</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meal-item">
+                <div class="meal-time-col">
+                    <div style="font-size:11px;color:var(--green);font-weight:700;">12:00</div>
+                    <div class="meal-dot" style="background:var(--green);"></div>
+                    <div class="meal-line" style="background:linear-gradient(var(--green),var(--primary));"></div>
+                </div>
+                <div class="meal-card-content">
+                    <div class="meal-card-header">
+                        <h4>☀️ 午餐</h4>
+                        <span class="meal-calories">~650 kcal</span>
+                    </div>
+                    <div class="meal-dishes">
+                        <div class="dish-item">
+                            <div class="dish-emoji">🍚</div>
+                            <div class="dish-name">糙米饭</div>
+                            <div class="dish-cal">220kcal</div>
+                        </div>
+                        <div class="dish-item">
+                            <div class="dish-emoji">🐔</div>
+                            <div class="dish-name">清蒸鸡胸</div>
+                            <div class="dish-cal">200kcal</div>
+                        </div>
+                        <div class="dish-item">
+                            <div class="dish-emoji">🥦</div>
+                            <div class="dish-name">西兰花</div>
+                            <div class="dish-cal">80kcal</div>
+                        </div>
+                        <div class="dish-item">
+                            <div class="dish-emoji">🍅</div>
+                            <div class="dish-name">番茄汤</div>
+                            <div class="dish-cal">50kcal</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meal-item">
+                <div class="meal-time-col">
+                    <div style="font-size:11px;color:var(--primary);font-weight:700;">18:30</div>
+                    <div class="meal-dot" style="background:var(--primary);"></div>
+                    <div class="meal-line" style="background:transparent;"></div>
+                </div>
+                <div class="meal-card-content">
+                    <div class="meal-card-header">
+                        <h4>🌙 晚餐</h4>
+                        <span class="meal-calories">~420 kcal</span>
+                    </div>
+                    <div class="meal-dishes">
+                        <div class="dish-item">
+                            <div class="dish-emoji">🐟</div>
+                            <div class="dish-name">清蒸鱼</div>
+                            <div class="dish-cal">180kcal</div>
+                        </div>
+                        <div class="dish-item">
+                            <div class="dish-emoji">🥗</div>
+                            <div class="dish-name">凉拌黄瓜</div>
+                            <div class="dish-cal">40kcal</div>
+                        </div>
+                        <div class="dish-item">
+                            <div class="dish-emoji">🍠</div>
+                            <div class="dish-name">紫薯</div>
+                            <div class="dish-cal">120kcal</div>
+                        </div>
+                        <div class="dish-item">
+                            <div class="dish-emoji">🫐</div>
+                            <div class="dish-name">蓝莓</div>
+                            <div class="dish-cal">50kcal</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">😴 睡眠建议</div>
+        <div class="sleep-card">
+            <div class="sleep-header">
+                <h3>🌙 今晚睡眠计划</h3>
+                <span>目标 7.5 小时</span>
+            </div>
+            <div class="sleep-timeline">
+                <div class="sleep-bar" style="width:75%;"></div>
+            </div>
+            <div class="sleep-times">
+                <span>22:30 入睡</span>
+                <span>→</span>
+                <span>06:00 起床</span>
+            </div>
+            <div class="sleep-tips">
+                <div class="sleep-tip">
+                    <span>📵</span>
+                    <p>睡前 1 小时放下手机，减少蓝光刺激</p>
+                </div>
+                <div class="sleep-tip">
+                    <span>🌡️</span>
+                    <p>保持室温 18-22℃，有助深度睡眠</p>
+                </div>
+                <div class="sleep-tip">
+                    <span>🧘</span>
+                    <p>睡前 10 分钟冥想或腹式呼吸</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 我的页 -->
+    <div class="page" id="page-profile">
+        <div class="profile-header">
+            <div class="profile-user">
+                <div class="profile-avatar">🏃</div>
+                <div class="profile-info">
+                    <h3>运动达人小李</h3>
+                    <p>连续打卡 21 天 🔥</p>
+                    <span class="profile-badge">🥈 银牌运动员</span>
+                </div>
+            </div>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-num">147</div>
+                    <div class="stat-label">累计运动天</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">892</div>
+                    <div class="stat-label">总里程(km)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">68,400</div>
+                    <div class="stat-label">消耗热量</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="record-card" style="margin:16px 16px 10px;">
+            <div class="record-header">
+                <h4>📊 本周运动</h4>
+                <span>查看全部 ›</span>
+            </div>
+            <div class="week-chart">
+                <div class="week-bar-item">
+                    <div class="week-bar" style="height:60%;background:linear-gradient(#4F8EF7,#6C63FF);"></div>
+                    <div class="week-label">一</div>
+                    <div class="week-val">45m</div>
+                </div>
+                <div class="week-bar-item">
+                    <div class="week-bar" style="height:80%;background:linear-gradient(#FF6B6B,#FF9F43);"></div>
+                    <div class="week-label">二</div>
+                    <div class="week-val">60m</div>
+                </div>
+                <div class="week-bar-item">
+                    <div class="week-bar" style="height:30%;background:linear-gradient(#4F8EF7,#6C63FF);"></div>
+                    <div class="week-label">三</div>
+                    <div class="week-val">20m</div>
+                </div>
+                <div class="week-bar-item">
+                    <div class="week-bar" style="height:100%;background:linear-gradient(#2ECB8E,#1aab72);"></div>
+                    <div class="week-label">四</div>
+                    <div class="week-val">75m</div>
+                </div>
+                <div class="week-bar-item">
+                    <div class="week-bar" style="height:50%;background:linear-gradient(#4F8EF7,#6C63FF);"></div>
+                    <div class="week-label">五</div>
+                    <div class="week-val">35m</div>
+                </div>
+                <div class="week-bar-item">
+                    <div class="week-bar" style="height:90%;background:linear-gradient(#FF6B6B,#FF9F43);"></div>
+                    <div class="week-label">六</div>
+                    <div class="week-val">68m</div>
+                </div>
+                <div class="week-bar-item">
+                    <div class="week-bar" style="height:40%;background:linear-gradient(#A66CFF,#6C63FF);"></div>
+                    <div class="week-label">日</div>
+                    <div class="week-val">30m</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-list">
+            <div class="menu-item" onclick="showToast('我的收藏')">
+                <div class="menu-icon" style="background:rgba(255,159,67,0.12);">⭐</div>
+                <div class="menu-label">我的收藏</div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="showToast('运动记录')">
+                <div class="menu-icon" style="background:rgba(79,142,247,0.12);">📋</div>
+                <div class="menu-label">运动记录</div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="showToast('我的报名')">
+                <div class="menu-icon" style="background:rgba(255,107,107,0.12);">🎫</div>
+                <div class="menu-label">我的报名</div>
+                <span class="menu-badge">2</span>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="openCrawlConfig()">
+                <div class="menu-icon" style="background:rgba(46,203,142,0.12);">🕸️</div>
+                <div class="menu-label">数据爬取设置</div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="showToast('健康档案')">
+                <div class="menu-icon" style="background:rgba(166,108,255,0.12);">💊</div>
+                <div class="menu-label">健康档案</div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="showToast('消息通知')">
+                <div class="menu-icon" style="background:rgba(255,159,67,0.12);">🔔</div>
+                <div class="menu-label">消息通知</div>
+                <span class="menu-badge">5</span>
+                <div class="menu-arrow">›</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="switchPage('home')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">首页</span>
+    </div>
+    <div class="nav-item" id="nav-nearby" onclick="switchPage('nearby')">
+        <span class="nav-icon">📍</span>
+        <span class="nav-label">附近</span>
+    </div>
+    <div class="nav-center-btn" onclick="switchPage('course')">
+        <div class="center-circle">🎯</div>
+        <span class="nav-label">跟练</span>
+    </div>
+    <div class="nav-item" id="nav-health" onclick="switchPage('health')">
+        <span class="nav-icon">🥗</span>
+        <span class="nav-label">健康</span>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="switchPage('profile')">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">我的</span>
+    </div>
+</div>
+
+<div class="modal-overlay" id="venueModal" onclick="closeModal('venueModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div id="venueModalContent"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="crawlModal" onclick="closeModal('crawlModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="modal-title">⚙️ 数据源配置</div>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">开启后自动爬取对应平台数据，实时更新附近活动与场馆信息</p>
+        <div class="crawl-source-list">
+            <div class="crawl-source-item">
+                <div class="source-logo" style="background:rgba(255,107,107,0.12);">🏅</div>
+                <div class="source-info">
+                    <h5>赛事大数据平台</h5>
+                    <p>马拉松、铁人三项等官方赛事报名</p>
+                </div>
+                <div class="toggle-switch on" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="crawl-source-item">
+                <div class="source-logo" style="background:rgba(79,142,247,0.12);">🗺️</div>
+                <div class="source-info">
+                    <h5>地图 POI 数据</h5>
+                    <p>健身房、游泳馆、瑜伽工作室</p>
+                </div>
+                <div class="toggle-switch on" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="crawl-source-item">
+                <div class="source-logo" style="background:rgba(255,159,67,0.12);">📅</div>
+                <div class="source-info">
+                    <h5>活动平台（大麦/摩登天空）</h5>
+                    <p>线下运动活动、健身打卡团</p>
+                </div>
+                <div class="toggle-switch on" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="crawl-source-item">
+                <div class="source-logo" style="background:rgba(166,108,255,0.12);">📺</div>
+                <div class="source-info">
+                    <h5>视频平台博主课程</h5>
+                    <p>B站/抖音/YouTube 跟练内容</p>
+                </div>
+                <div class="toggle-switch on" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="crawl-source-item">
+                <div class="source-logo" style="background:rgba(46,203,142,0.12);">🥗</div>
+                <div class="source-info">
+                    <h5>营养健康数据库</h5>
+                    <p>菜谱、营养素、热量数据</p>
+                </div>
+                <div class="toggle-switch on" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="crawl-source-item">
+                <div class="source-logo" style="background:rgba(26,26,78,0.08);">⛷️</div>
+                <div class="source-info">
+                    <h5>户外运动平台</h5>
+                    <p>滑雪场、攀岩馆、户外徒步</p>
+                </div>
+                <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+            </div>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:rgba(79,142,247,0.06);border-radius:12px;font-size:12px;color:var(--text-secondary);">
+            💡 <strong>爬取说明：</strong>数据每 2 小时自动更新，支持自定义城市范围（当前：上海，50km 内）。爬取数据仅用于个人推荐展示。
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:16px;justify-content:center;" onclick="closeModal('crawlModal');showToast('✅ 配置已保存')">保存配置</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    function switchPage(name) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('page-' + name).classList.add('active');
+        const navEl = document.getElementById('nav-' + name);
+        if (navEl) navEl.classList.add('active');
+        try { window.parent.postMessage({ type: 'pageSwitch', page: name }, '*'); } catch(e) {}
+    }
+
+    function setFilter(type) {
+        setTimeout(() => {
+            const tabs = document.querySelectorAll('.filter-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            const map = { marathon: 1, gym: 2, swim: 3, yoga: 4, ski: 5 };
+            if (map[type] !== undefined) tabs[map[type]].classList.add('active');
+            filterList(type);
+        }, 50);
+    }
+
+    function filterVenues(el, type) {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        filterList(type);
+    }
+
+    function filterList(type) {
+        document.querySelectorAll('.venue-card').forEach(card => {
+            if (type === 'all' || card.dataset.type === type) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    const venueDetails = {
+        marathon: {
+            title: '🏅 2026上海国际马拉松',
+            items: [
+                { icon: '📅', title: '比赛日期', desc: '2026年10月25日（周日）07:00 鸣枪' },
+                { icon: '📍', title: '起终点', desc: '外滩中山东一路 · 距您 3.2km' },
+                { icon: '🏃', title: '项目设置', desc: '全马 42.195km / 半马 21km / 迷你 5km' },
+                { icon: '💰', title: '报名费用', desc: '全马 ¥280 / 半马 ¥200 / 迷你 ¥80' },
+                { icon: '⚠️', title: '名额状态', desc: '全马剩余 208 个，报名截止 10月10日' },
+                { icon: '🔗', title: '数据来源', desc: '赛事大数据平台 · 10分钟前更新' }
+            ]
+        },
+        yoga: {
+            title: '🧘 Flow 瑜伽工作室',
+            items: [
+                { icon: '📍', title: '地址', desc: '静安区南京西路 1166号 3楼 · 距您 1.5km' },
+                { icon: '🕐', title: '课程时间', desc: '明日 07:30 / 12:00 / 19:00（多场次）' },
+                { icon: '👩‍🏫', title: '教练', desc: 'Lily Wang · RYT-500认证 · 8年教龄' },
+                { icon: '💰', title: '价格', desc: '单次 ¥39 / 5节包 ¥99 / 月卡 ¥299' },
+                { icon: '✅', title: '剩余名额', desc: '明日早课 3 个位置' },
+                { icon: '🔗', title: '数据来源', desc: '地图 POI · 2小时前更新' }
+            ]
+        },
+        gym: {
+            title: '🏋️ 威尔仕健身（静安店）',
+            items: [
+                { icon: '📍', title: '地址', desc: '静安区愚园路 1111号 B1 · 距您 0.8km' },
+                { icon: '🕐', title: '营业时间', desc: '周一至周日 06:00-23:00' },
+                { icon: '🏊', title: '设施', desc: '器械区 / 有氧区 / 游泳池 / 团操房 / SPA' },
+                { icon: '💰', title: '价格', desc: '月卡 ¥199 / 季卡 ¥399 / 年卡 ¥999' },
+                { icon: '⭐', title: '评分', desc: '4.7分（1,234条评价）' },
+                { icon: '🔗', title: '数据来源', desc: '地图 POI · 30分钟前更新' }
+            ]
+        },
+        swim: {
+            title: '🏊 奥体游泳中心',
+            items: [
+                { icon: '📍', title: '地址', desc: '浦东新区浦东南路 1111号 · 距您 2.8km' },
+                { icon: '🕐', title: '营业时间', desc: '06:30-22:00（工作日）/ 06:00-22:00（周末）' },
+                { icon: '🏊', title: '泳池', desc: '50m标准池 × 2 / 儿童池 / 恒温 26℃' },
+                { icon: '💰', title: '价格', desc: '单次 ¥29（特惠）/ 次卡10次 ¥199' },
+                { icon: '📊', title: '实时人流', desc: '当前较空闲（约 30人）' },
+                { icon: '🔗', title: '数据来源', desc: '地图 POI + 官网 · 实时' }
+            ]
+        },
+        ski: {
+            title: '⛷️ 崇礼万龙滑雪场',
+            items: [
+                { icon: '📍', title: '地址', desc: '河北省张家口市崇礼区 · 距您约 280km' },
+                { icon: '📅', title: '开板时间', desc: '预计 2026年10月15日开板' },
+                { icon: '⛷️', title: '雪道', desc: '初级 / 中级 / 高级 / 专业赛道，全长 60km+' },
+                { icon: '💰', title: '早鸟票', desc: '平日票 ¥480 / 周末 ¥580（8折早鸟）' },
+                { icon: '🚌', title: '交通', desc: '高铁 2.5h（北京丰台→崇礼）+接驳班车' },
+                { icon: '🔗', title: '数据来源', desc: '户外运动平台 · 每日更新' }
+            ]
+        }
+    };
+
+    function openVenueDetail(id) {
+        const data = venueDetails[id] || venueDetails.gym;
+        let html = `<div class="modal-title">${data.title}</div>`;
+        data.items.forEach(item => {
+            html += `<div class="detail-row">
+                <div class="detail-icon">${item.icon}</div>
+                <div class="detail-info">
+                    <h5>${item.title}</h5>
+                    <p>${item.desc}</p>
+                </div>
+            </div>`;
+        });
+        html += `<button class="btn btn-primary" style="width:100%;margin-top:16px;justify-content:center;" onclick="showToast('✅ 报名成功！已发送确认到手机');closeModal('venueModal')">立即报名 / 预约</button>`;
+        document.getElementById('venueModalContent').innerHTML = html;
+        document.getElementById('venueModal').classList.add('show');
+    }
+
+    function openCourseDetail(id) {
+        showToast('▶ 正在加载课程...');
+    }
+
+    function openCrawlConfig() {
+        document.getElementById('crawlModal').classList.add('show');
+    }
+
+    function toggleSwitch(el) {
+        el.classList.toggle('on');
+        showToast(el.classList.contains('on') ? '✅ 已开启' : '⭕ 已关闭');
+    }
+
+    function refreshCrawl() {
+        showToast('🔄 正在更新数据...');
+        setTimeout(() => showToast('✅ 数据更新完成，共 24 个结果'), 1500);
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('show');
+    }
+
+    function togglePlan(el) {
+        const check = el.querySelector('.plan-check');
+        check.classList.toggle('done');
+        check.textContent = check.classList.contains('done') ? '✓' : '';
+        updatePlanProgress();
+    }
+
+    function updatePlanProgress() {
+        const done = document.querySelectorAll('.plan-check.done').length;
+        const total = document.querySelectorAll('.plan-check').length;
+        document.querySelector('.plan-header span').textContent = `已完成 ${done}/${total}`;
+    }
+
+    const waterState = [true, true, true, true, false, false, false, false];
+
+    function toggleWater(idx) {
+        waterState[idx] = !waterState[idx];
+        const cups = document.querySelectorAll('.water-cup');
+        cups.forEach((c, i) => {
+            c.classList.toggle('filled', waterState[i]);
+        });
+        const count = waterState.filter(Boolean).length;
+        document.getElementById('waterProgress').textContent =
+            `已喝 ${count * 250}ml · 还差 ${Math.max(0, (8 - count) * 250)}ml`;
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+            showToast('🔍 搜索：' + this.value);
+            switchPage('nearby');
+            this.blur();
+        }
+    });
+
+    function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        document.querySelector('.status-bar .time').textContent = h + ':' + m;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 接收父页面切换指令
+    window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'parentSwitch') {
+            switchPage(e.data.page);
+        }
+    });
+</script>
+
+</body>
+</html>
+</template>
+
+<script>
+    const TABS = ['home','nearby','course','health','profile'];
+
+    // 注入 App 到 iframe
+    (function initApp() {
+        const frame = document.getElementById('appFrame');
+        const src = document.getElementById('app-src').innerHTML;
+        frame.srcdoc = '<!DOCTYPE html>' + src;
+    })();
+
+    function switchTab(name) {
+        TABS.forEach(t => {
+            const isActive = t === name;
+            document.getElementById('btn-' + t).classList.toggle('active', isActive);
+            document.getElementById('ti-'  + t).classList.toggle('active', isActive);
+            document.getElementById('explain-' + t).classList.toggle('active', isActive);
+        });
+        try {
+            document.getElementById('appFrame').contentWindow.postMessage({ type: 'parentSwitch', page: name }, '*');
+        } catch(e) {}
+    }
+
+    // 接收 iframe 内部导航同步
+    window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'pageSwitch' && TABS.includes(e.data.page)) {
+            TABS.forEach(t => {
+                const isActive = t === e.data.page;
+                document.getElementById('btn-' + t).classList.toggle('active', isActive);
+                document.getElementById('ti-'  + t).classList.toggle('active', isActive);
+                document.getElementById('explain-' + t).classList.toggle('active', isActive);
+            });
+        }
+    });
+</script>
+</body>
+</html>
